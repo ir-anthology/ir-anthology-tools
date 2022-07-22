@@ -7,12 +7,16 @@ IRANTHOLOGY_BIB_FILE_GIT := $(IRANTHOLOGY_DATA_GIT)ir-anthology.bib
 
 # TODO: SETUP VENV
 
+.PHONY: all
+all:
+	@echo "Just here to catch an accidental make (all)!"
+
 # = CLEAN ======================================================================
 
 .PHONY: clean
 clean: clean/delete-ir-anthology-bib
 
-.PHONY clean-tmp
+.PHONY: clean-tmp
 clean-tmp: clean/delete-corpus-wcsp15
 	ls -lAhF $(IRANTHOLOGY_PROD_DIR)tmp/
 
