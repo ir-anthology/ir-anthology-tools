@@ -21,12 +21,13 @@ def get_next_bibfile():
 
 
 def extract_bib_contents(bibfile_path: str):
-    with open(bibfile_path) as f:
+    with open(bibfile_path, encoding='iso8859-1', errors='ignore') as f:
         bibfile_lines = f.readlines()
     acmid = Path(bibfile_path).stem
     bib_before = f'<PRE id="{acmid}">'
     bib_after = '</pre>'
     copy = False
+    bib_found = False
     bib_text = []
     doi = ''
     for line in bibfile_lines:
@@ -40,13 +41,16 @@ def extract_bib_contents(bibfile_path: str):
                 doi = line[8:].replace('},', '').replace('}', '')
         if bib_before in line:
             copy = True
-    return ''.join(bib_text), doi
+            bib_found = True
+    return ''.join(bib_text), doi, bib_found
 
 
 def save_bibfile_data(text: str, doi: str):
-    separator_pos = doi.find('/')
-    prefix = doi[:separator_pos]
-    with open(f'{wcsp15_out_dir}{prefix}.bib', 'a') as output_bibfile:
+    prefix = 'unknown'
+    if doi:
+        separator_pos = doi.find('/')
+        prefix = doi[:separator_pos]
+    with open(f'{wcsp15_out_dir}{prefix}.bib', 'a', encoding='utf-8') as output_bibfile:
         output_bibfile.write(f'{text}\n')
 
 
@@ -56,5 +60,9 @@ wcsp15_out_dir = '/mnt/ceph/storage/data-in-production/ir-anthology/tmp/wcsp15/'
 if __name__ == '__main__':
     check_args() or usage()
     for input_bibfile in get_next_bibfile():
-        text, doi = extract_bib_contents(input_bibfile)
-        save_bibfile_data(text, doi)
+        print(input_bibfile)
+        text, doi, bib_found = extract_bib_contents(input_bibfile)
+        if bib_found:
+            save_bibfile_data(text, doi)
+        else:
+            print(f'↳ NO DATA')
